@@ -2,57 +2,63 @@
  * @Author: panrunjun
  * @Date: 2024-06-17 17:25:21
  * @LastEditors: Do not edit
- * @LastEditTime: 2024-06-17 17:54:56
+ * @LastEditTime: 2024-06-24 17:11:59
  * @Description: 
  * @FilePath: \react-canvas\src\App.tsx
  */
-import React from 'react'
+import React, { useEffect } from 'react'
 import './App.css'
+// import {Button} from 'antd'
+import Button from './class/Button'
+import Draggable from './class/Draggable'
 
-const draw = (ctx: any) => {
-  console.log('draw')
-  ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(150, 20);
-  ctx.arcTo(150, 100, 50, 20, 30);
-  ctx.stroke();
-
-  ctx.fillStyle = "blue";
-  // base point
-  ctx.fillRect(150, 20, 10, 10);
-
-  ctx.fillStyle = "red";
-  // control point one
-  ctx.fillRect(150, 100, 10, 10);
-  // control point two
-  ctx.fillRect(50, 20, 10, 10);
-  //
-  ctx.setLineDash([5, 5]);
-  ctx.moveTo(150, 20);
-  ctx.lineTo(150, 100);
-  ctx.lineTo(50, 20);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(120, 38, 30, 0, 2 * Math.PI);
-  ctx.stroke();
-}
 function App() {
   const canvasRef = React.useRef(null)
   const [locations, setLocations] = React.useState([])
 
+
+  useEffect(() => {
+    const canvas = canvasRef.current as any
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const button = new Button(ctx, 50, 50, 200, 50, 'Click Me', () => {
+          // alert('Button clicked!');
+          console.log("e")
+        });
+        new Draggable(button, canvas);
+
+        const button2 = new Button(ctx, 300, 50, 200, 50, 'Click Me2', () => {
+          // alert('Button clicked!');
+          console.log("e")
+        });
+        button2.draw();
+        button.draw();
+        // 防止重复绑定，先移除之前可能已添加的事件监听器
+        const handleClick = button.handleClick.bind(button);
+        const handleClick2 = button.handleClick.bind(button2);
+        canvas.addEventListener('click', handleClick);
+        canvas.addEventListener('click', handleClick2);
+        // 清理函数，在组件卸载或更新时移除事件监听器
+        return () => {
+          canvas.removeEventListener('click', handleClick);
+          canvas.removeEventListener('click', handleClick2);
+        };
+      }
+    }
+  }, [])
   return (
     <>
       <canvas
         ref={canvasRef}
         width={window.innerWidth}
         height={window.innerHeight}
-        onClick={e => {
-          const canvas = canvasRef.current
-          const ctx = canvas.getContext('2d')
-          // implement draw on ctx here
-          draw(ctx)
-        }}
-
+      // onClick={e => {
+      //   const canvas = canvasRef.current
+      //   const ctx = canvas.getContext('2d')
+      //   // implement draw on ctx here
+      //   draw(ctx)
+      // }}
       />
     </>
   )
